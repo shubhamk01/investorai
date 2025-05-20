@@ -1,6 +1,8 @@
 pandas
-yfinance
-transformers
+numpy
 torch
+transformers
+scikit-learn
 requests
-beautifulsoup4
+PyYAML
+ta

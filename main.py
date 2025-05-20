@@ -1,15 +1,15 @@
 import time
-from config.config import load_config
-from adapters import BrokerAdapterFactory
-from data_fetcher.stock import StockDataFetcher
-from data_fetcher.news import NewsFetcher
-from features.engineer import FeatureEngineer
-from models.price_predictor import PricePredictor
-from models.sentiment_analyzer import NewsSentimentAnalyzer
-from models.fusion import FusionDecisionModel
-from trader.engine import TradingEngine
-from risk.manager import RiskManager
-from logger.logger import Logger
+from investorai.config.config import load_config
+from investorai.adapters import BrokerAdapterFactory
+from investorai.data_fetcher.stock import StockDataFetcher
+from investorai.data_fetcher.news import NewsFetcher
+from investorai.features.engineer import FeatureEngineer
+from investorai.models.price_predictor import PricePredictor
+from investorai.models.sentiment_analyzer import NewsSentimentAnalyzer
+from investorai.models.fusion import FusionDecisionModel
+from investorai.trader.engine import TradingEngine
+from investorai.risk.manager import RiskManager
+from investorai.logger.logger import Logger
 
 def main():
     config = load_config()

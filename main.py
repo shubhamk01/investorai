@@ -1,19 +1,40 @@
-from broker.zerodha_adapter import Zerodha
-from data.stock_data_fetcher import get_stock_data
-from data.news_aggregator import get_news
-from model.lstm_predictor import predict_trend
-from model.sentiment_analyzer import analyze_sentiment
-from engine.decision_engine import make_decision
-from engine.trade_executor import execute_trade
+import time
+from config.config import load_config
+from adapters import BrokerAdapterFactory
+from data_fetcher.stock import StockDataFetcher
+from data_fetcher.news import NewsFetcher
+from features.engineer import FeatureEngineer
+from models.price_predictor import PricePredictor
+from models.sentiment_analyzer import NewsSentimentAnalyzer
+from models.fusion import FusionDecisionModel
+from trader.engine import TradingEngine
+from risk.manager import RiskManager
+from logger.logger import Logger
 
-capital = 100000  # User input
-broker = Zerodha(api_key="your_api_key", api_secret="your_api_secret")
+def main():
+    config = load_config()
 
-stocks = ['TCS', 'INFY', 'RELIANCE']
-for stock in stocks:
-    df = get_stock_data(stock)
-    news = get_news(stock)
-    trend = predict_trend(df)
-    sentiment = analyze_sentiment(news)
-    decision = make_decision(stock, trend, sentiment, capital)
-    execute_trade(broker, stock, decision)
+    broker = BrokerAdapterFactory.create(config['broker'], config['api_keys'])
+    stock_fetcher = StockDataFetcher(broker)
+    news_fetcher = NewsFetcher(config['news_api_keys'])
+    feature_engineer = FeatureEngineer()
+    price_predictor = PricePredictor()
+    sentiment_analyzer = NewsSentimentAnalyzer()
+    decision_model = FusionDecisionModel()
+    risk_manager = RiskManager(config['risk'])
+    trader = TradingEngine(broker, risk_manager)
+    logger = Logger(config['log_path'])
+
+    while True:
+        stock_data = stock_fetcher.fetch_all(config['stocks'])
+        news_data = news_fetcher.fetch_all(config['stocks'])
+        features = feature_engineer.create(stock_data, news_data)
+        price_preds = price_predictor.predict(features)
+        news_sents = sentiment_analyzer.analyze(news_data)
+        actions = decision_model.decide(price_preds, news_sents, features)
+        trader.execute(actions, config['capital'])
+        logger.log(actions, price_preds, news_sents)
+        time.sleep(config['run_interval'])
+
+if __name__ == "__main__":
+    main()

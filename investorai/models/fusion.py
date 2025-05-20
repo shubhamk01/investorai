@@ -1,5 +1,10 @@
 class FusionDecisionModel:
+    def __init__(self, logger=None):
+        self.logger = logger
+
     def decide(self, price_preds, news_sents, features):
+        if self.logger:
+            self.logger.info("Fusing predictions and sentiment for trade decision.")
         actions = {}
         for symbol in price_preds:
             pred = price_preds[symbol]

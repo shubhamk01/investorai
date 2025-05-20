@@ -14,19 +14,27 @@ class LSTMPricePredictor(nn.Module):
         return out
 
 class PricePredictor:
-    def __init__(self):
+    def __init__(self, logger=None):
         self.model = LSTMPricePredictor()
+        self.logger = logger
         # Placeholder: load model weights if available
 
     def predict(self, features):
+        if self.logger:
+            self.logger.info("Predicting prices using LSTM model.")
         preds = {}
         for symbol, feats in features.items():
             if not feats:
                 preds[symbol] = None
                 continue
-            arr = np.array([[f.get('close', 0), f.get('rsi', 0), f.get('sma', 0), f.get('ema', 0), 0] for f in feats])
-            arr = torch.tensor(arr, dtype=torch.float32).unsqueeze(0)
-            with torch.no_grad():
-                pred = self.model(arr).item()
-            preds[symbol] = pred
+            try:
+                arr = np.array([[f.get('close', 0), f.get('rsi', 0), f.get('sma', 0), f.get('ema', 0), 0] for f in feats])
+                arr = torch.tensor(arr, dtype=torch.float32).unsqueeze(0)
+                with torch.no_grad():
+                    pred = self.model(arr).item()
+                preds[symbol] = pred
+            except Exception as e:
+                if self.logger:
+                    self.logger.error(f"Error predicting price for {symbol}: {e}")
+                preds[symbol] = None
         return preds

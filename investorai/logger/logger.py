@@ -18,3 +18,9 @@ class Logger:
                 writer.writerow([
                     ts, symbol, action, price_preds.get(symbol, ""), news_sents.get(symbol, "")
                 ])
+
+    def info(self, message, *args):
+        print(f"[INFO] {datetime.now().isoformat()} - {message % args if args else message}")
+
+    def error(self, message, *args):
+        print(f"[ERROR] {datetime.now().isoformat()} - {message % args if args else message}")
